@@ -1,0 +1,134 @@
+<%--
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+--%>
+
+<%!
+public static class NaiveParser {
+
+	public List<CsvEntry> getTestCsvEntries() {
+		List<CsvEntry> csvEntries = new ArrayList<CsvEntry>();
+
+		String stinrgCsvEntries = null;
+
+		stinrgCsvEntries = getInputString(NaiveConstants.CSV_FILE_LOCATION);
+
+		CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+
+		try{
+			CSVParser parser = CSVParser.parse(stinrgCsvEntries, format);
+
+			for (CSVRecord csvRecord : parser) {
+				if (csvRecord.get("IsTraining").equals("FALSE")) {
+					CsvEntry csvEntry = new CsvEntry();
+
+					setFields(csvEntry, csvRecord);
+
+					csvEntry.setIsWon(csvRecord.get("IsWon"));
+
+					csvEntries.add(csvEntry);
+				}
+			}
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return csvEntries;
+	}
+
+	public List<CsvEntry> getTrainingCsvEntries(boolean isWon) {
+		List<CsvEntry> csvEntries = new ArrayList<CsvEntry>();
+
+		String stinrgCsvEntries = null;
+
+		stinrgCsvEntries = getInputString(NaiveConstants.CSV_FILE_LOCATION);
+
+		CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+
+		try{
+			CSVParser parser = CSVParser.parse(stinrgCsvEntries, format);
+
+			if (isWon) {
+				for (CSVRecord csvRecord : parser) {
+					if (csvRecord.get("IsWon").equals("TRUE") && csvRecord.get("IsTraining").equals("TRUE")) {
+						CsvEntry csvEntry = new CsvEntry();
+
+						setFields(csvEntry, csvRecord);
+
+						csvEntries.add(csvEntry);
+					}
+				}
+			} else {
+				for (CSVRecord csvRecord : parser) {
+					if (csvRecord.get("IsWon").equals("FALSE") && csvRecord.get("IsTraining").equals("TRUE")) {
+						CsvEntry csvEntry = new CsvEntry();
+
+						setFields(csvEntry, csvRecord);
+
+						csvEntries.add(csvEntry);
+					}
+				}
+			}
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return csvEntries;
+	}
+
+	private InputStream getInputStream(String path) {
+		inputStream = loader.getResourceAsStream(path);
+
+		return inputStream;
+	}
+
+	private String getInputString(String path) {
+		inputStream = getInputStream(path);
+
+		String inputString = null;
+
+		try{
+			if (inputStream != null) {
+				inputString = IOUtils.toString(inputStream, NaiveConstants.ENCODING_TYPE_UTF_8);
+			}
+
+			inputStream.close();
+		}catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+		return inputString;
+	}
+
+	private void setFields(CsvEntry csvEntry, CSVRecord csvRecord) {
+		csvEntry.setCompanyName(csvRecord.get("CompanyName"));
+
+		csvEntry.setCountry(csvRecord.get("Country"));
+
+		csvEntry.setDepartment(csvRecord.get("Department"));
+
+		csvEntry.setIndustry(csvRecord.get("Industry"));
+
+		csvEntry.setIsClosed(csvRecord.get("IsClosed"));
+
+		csvEntry.setJobTitle(csvRecord.get("JobTitle"));
+
+		csvEntry.setLeadId(csvRecord.get("LeadId"));
+	}
+
+	private InputStream inputStream = null;
+	private ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+}
+%>
